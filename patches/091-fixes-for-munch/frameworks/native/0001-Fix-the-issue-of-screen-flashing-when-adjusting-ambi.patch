@@ -1,0 +1,33 @@
+From f4ace31abecf09ed04a88279fdcc415d9cf75ef4 Mon Sep 17 00:00:00 2001
+From: zhengchuanlong <zhengchuanlong@xiaomi.com>
+Date: Tue, 25 Feb 2025 12:24:00 +0800
+Subject: [PATCH] Fix the issue of screen flashing when adjusting ambient light
+ when playing HDR video.
+
+Bug:360380695
+Test:Manual
+
+The comparison operation comment of the LayerSettings.h file describes "Keep in sync with custom comparison function in compositionengine/impl/ClientCompositionRequestCache.cpp". However, for the comparison of LayerSetting, white point value comparison is added in LayerSettings.h, but not in ClientCompositionRequestCache.cpp, which makes the HDR video dimming cache ineffective and causes screen flickering.
+
+Google: 3505711
+Change-Id: I54d230ddf176660c5e83f771a59154debce7f541
+Signed-off-by: zhengchuanlong <zhengchuanlong@xiaomi.com>
+Signed-off-by: Dmitrii <bankersenator@gmail.com>
+---
+ .../CompositionEngine/src/ClientCompositionRequestCache.cpp    | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp b/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp
+index d9018bc3ab..dc841952c9 100644
+--- a/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp
++++ b/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp
+@@ -38,7 +38,8 @@ inline bool equalIgnoringSource(const renderengine::LayerSettings& lhs,
+             lhs.disableBlending == rhs.disableBlending && lhs.shadow == rhs.shadow &&
+             lhs.backgroundBlurRadius == rhs.backgroundBlurRadius &&
+             lhs.stretchEffect == rhs.stretchEffect &&
+-            lhs.edgeExtensionEffect == rhs.edgeExtensionEffect;
++            lhs.edgeExtensionEffect == rhs.edgeExtensionEffect &&
++            lhs.whitePointNits == rhs.whitePointNits;
+ }
+ 
+ inline bool equalIgnoringBuffer(const renderengine::Buffer& lhs, const renderengine::Buffer& rhs) {
